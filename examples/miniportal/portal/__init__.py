@@ -1,52 +1,40 @@
 import os
 import codecs
-from flask import Blueprint, render_template, render_template_string, send_from_directory, abort
 from markdown import Markdown
-import jinja2
+from werkzeug.utils import cached_property
+from flask import Flask, g, url_for, render_template_string, Markup, Blueprint
 
-
-def favicon():
-    return send_from_directory(os.path.join(portal.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
-
-def render_page(path, content_folder):
-    try:
+class Page:
+    def __init__(self, path):
+        self.path = path
         # UTF-8 here is intentional!
-        with codecs.open(os.path.join(content_folder, path + '.md'), encoding='utf-8') as f:
-            content = f.read()
-    except IOError:
-        abort(404)
+        with codecs.open(self.path, encoding='utf-8') as f:
+            self.raw_content = f.read()
 
-    content = render_template_string(content)
+        self._load_meta()
 
-    markdown = Markdown(
-        extensions=['meta', 'tables', 'fenced_code']
-    )
+    # Because we need only the meta, we parse the document without executing jinja templates inside it
+    def _load_meta(self):
+        markdown = Markdown(extensions=['meta']) # No need for other extensions
+        markdown.convert(self.raw_content)
+        self.meta = markdown.Meta
 
-    html_content = markdown.convert(content)
+    def load(self):
+        content = render_template_string(Markup(self.raw_content), page=self)
+        markdown = Markdown(extensions=['meta', 'tables', 'fenced_code'])
+        self.html_content = markdown.convert(content)
 
-    #misaka
-    # html_content = markdown(content)
-    
-    meta = markdown.Meta
-    meta = dict((k, v[0]) for k, v in meta.iteritems())
+    @cached_property
+    def url(self):
+        path =  os.path.relpath(self.path, g.app.config['PAGES_DIR'])
+        path = os.path.splitext(path)[0]
+        return url_for('portal.render_page', path=path)
 
-    template = meta.get('template', 'page.html')
+    @property
+    def title(self):
+        return self.meta['title'][0]
 
-    return render_template(template, content=html_content, **meta)
 
+blueprint = Blueprint('portal', __name__)
 
-def add_portal(app, portal_name, **options):
-    content_folder = options.pop('content_folder')
-
-    portal = Blueprint(portal_name, portal_name, **options)
-    portal.add_url_rule('/favicon.ico', 'favicon',     favicon)
-    portal.add_url_rule('/',            'render_page', render_page, defaults={'content_folder': content_folder, 'path': 'index'})
-    portal.add_url_rule('/<path:path>', 'render_page', render_page, defaults={'content_folder': content_folder})
-
-    # Add macros
-    from .macros import youtube
-    app.jinja_env.globals['youtube'] = youtube.macro
-
-    app.register_blueprint(portal)
+from portal import macros
