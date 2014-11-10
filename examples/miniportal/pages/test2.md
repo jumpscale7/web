@@ -26,5 +26,5 @@ append(foo, bar); // ['a', 'b', 'b', 'd']
 {% endfor %}
 ```
 
-This is a [link to the homepage]({{ url_for('render_page')}})
+This is a [link to the homepage]({{ url_for('portal.render_page')}})
 
