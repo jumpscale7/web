@@ -1,14 +1,8 @@
 
-
 #BOOTSTRAP CODE
-handle = urlopen(url)
-with open(to, 'wb') as out:
-    while True:
-        data = handle.read(1024)
-        if len(data) == 0: break
-        out.write(data)
-handle.close()
-out.close()
+from urllib import urlopen
+handle = urlopen("https://raw.githubusercontent.com/Jumpscale/jumpscale_core/master/install/InstallTools.py")
+exec(handle.read())
 
+print do.prepareUbuntu14Development()
 
-print do.getTmpPath("test")
