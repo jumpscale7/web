@@ -2,7 +2,7 @@ import os
 import codecs
 from markdown import Markdown
 from werkzeug.utils import cached_property
-from flask import current_app, url_for, render_template, render_template_string, Markup, Blueprint
+from flask import current_app, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
 
 class Page:
     def __init__(self, path):
@@ -41,7 +41,7 @@ from portal import macros
 
 @blueprint.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
+    return send_from_directory(os.path.join(current_app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @blueprint.route('/', defaults={'path': 'index'})
