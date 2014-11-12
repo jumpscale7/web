@@ -2,7 +2,8 @@ import os
 import codecs
 from markdown import Markdown
 from werkzeug.utils import cached_property
-from flask import current_app, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
+from flask import current_app, abort, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
+from .markdown_extensions import BootstrapTableExtension
 
 class Page:
     def __init__(self, path):
@@ -21,7 +22,7 @@ class Page:
 
     def load(self):
         content = render_template_string(Markup(self.raw_content), page=self)
-        markdown = Markdown(extensions=['meta', 'tables', 'fenced_code', 'codehilite'])
+        markdown = Markdown(extensions=[BootstrapTableExtension(), 'meta', 'fenced_code', 'codehilite'])
         self.html_content = markdown.convert(content)
 
     @cached_property
@@ -47,9 +48,8 @@ def favicon():
 @blueprint.route('/', defaults={'path': 'index'})
 @blueprint.route('/<path:path>')
 def render_page(path):
-    page = Page(os.path.join(current_app.config['PAGES_DIR'], path + '.md'))
-    
     try:
+        page = Page(os.path.join(current_app.config['PAGES_DIR'], path + '.md'))
         page.load()
     except IOError:
         abort(404)
