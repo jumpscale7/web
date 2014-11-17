@@ -2,15 +2,18 @@ import os
 import codecs
 from markdown import Markdown
 from werkzeug.utils import cached_property
-from flask import current_app, abort, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
+from flask import Flask, current_app, request, abort, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
 from .markdown_extensions import BootstrapTableExtension
 
 class Page:
-    def __init__(self, path):
+    def __init__(self, path, content=None):
         self.path = path
         # UTF-8 here is intentional!
-        with codecs.open(self.path, encoding='utf-8') as f:
-            self.raw_content = f.read()
+        if content is None:
+            with codecs.open(self.path, encoding='utf-8') as f:
+                self.raw_content = f.read()
+        else:
+            self.raw_content = content
 
         self._load_meta()
 
@@ -19,9 +22,11 @@ class Page:
         markdown = Markdown(extensions=['meta']) # No need for other extensions
         markdown.convert(self.raw_content)
         self.meta = markdown.Meta
+        self.meta['page'] = self
+        self.meta['template'] = self.meta.get('template', 'page.html')
 
     def load(self):
-        content = render_template_string(Markup(self.raw_content), page=self)
+        content = render_template_string(self.raw_content, page=self)
         markdown = Markdown(extensions=[BootstrapTableExtension(), 'meta', 'fenced_code', 'codehilite'])
         self.html_content = markdown.convert(content)
 
@@ -33,7 +38,14 @@ class Page:
 
     @cached_property
     def title(self):
-        return self.meta['title'][0]
+        path =  os.path.relpath(self.path, current_app.config['PAGES_DIR'])
+        alt_title = os.path.splitext(path)[0]
+        return self.meta.get('title', [alt_title])[0]
+
+# Stop autoescaping
+class Portal(Flask):
+    def select_jinja_autoescape(self, filename):
+        return False
 
 
 blueprint = Blueprint('portal', __name__)
@@ -54,9 +66,15 @@ def render_page(path):
     except IOError:
         abort(404)
 
-    meta = page.meta
-    meta = dict((k, v[0]) for k, v in meta.iteritems())
-    meta['page'] = page
-    template = meta.get('template', 'page.html')
+    return render_template(page.meta['template'], content=page.html_content, page=page)
 
-    return render_template(template, content=Markup(page.html_content), **meta)
+@blueprint.route('/edit/<path:path>')
+def edit_page(path):
+    try:
+        content = request.args.get('content', None)
+        page = Page(os.path.join(current_app.config['PAGES_DIR'], path + '.md'), content=content)
+        page.load()
+    except IOError:
+        abort(404)
+
+    return render_template(page.meta['template'], content=page.html_content, page=page)
