@@ -4,7 +4,6 @@ from markdown import Markdown
 from werkzeug.utils import cached_property
 from flask import Flask, current_app, request, abort, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
 from .markdown_extensions import BootstrapTableExtension
-from .editing import EditView
 
 class Page:
     def __init__(self, path, content=None):
@@ -69,13 +68,3 @@ def render_page(path):
 
     return render_template(page.meta['template'], content=page.html_content, page=page)
 
-@blueprint.route('/edit/<path:path>')
-def edit_page(path):
-    try:
-        content = request.args.get('content', None)
-        page = Page(os.path.join(current_app.config['PAGES_DIR'], path + '.md'), content=content)
-        page.load()
-    except IOError:
-        abort(404)
-
-    return render_template(page.meta['template'], content=page.html_content, page=page)

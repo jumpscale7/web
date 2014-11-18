@@ -4,7 +4,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.admin import Admin
 from flask.ext.admin.contrib import fileadmin
 
-from portal import blueprint, Page, Portal, EditView
+from portal import blueprint, Page, Portal
+from portal.editing import EditView
 
 app = Portal(__name__)
 app.config['SECRET_KEY'] = '3294038'

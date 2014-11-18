@@ -1,6 +1,6 @@
 import os
 from flask import current_app, render_template, Markup
-from portal import blueprint, Page
+from portal import Page
 
 
 def is_page(f):
@@ -15,4 +15,4 @@ def get_dir_tree(dir):
 def childrentree():
     pages = get_dir_tree(current_app.config['PAGES_DIR'])
 
-    return Markup(render_template('_childrentree.html', pages=pages))
+    return Markup(render_template('partials/_childrentree.html', pages=pages))
