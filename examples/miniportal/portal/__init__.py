@@ -28,7 +28,7 @@ class Page:
 
     def load(self):
         content = render_template_string(self.raw_content, page=self)
-        markdown = Markdown(extensions=[BootstrapTableExtension(), 'meta', 'fenced_code', 'codehilite'])
+        markdown = Markdown(extensions=[BootstrapTableExtension(), 'meta', 'fenced_code', 'codehilite', 'nl2br'])
         self.html_content = markdown.convert(content)
 
     @cached_property

@@ -1,0 +1,2 @@
+## Stylish Portfolio is the perfect theme for your next project!
+<p class="lead">This theme features some wonderful photography courtesy of [Death to the Stock Photo](http://join.deathtothestockphoto.com/).</p>

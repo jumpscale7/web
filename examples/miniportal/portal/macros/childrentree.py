@@ -12,8 +12,7 @@ def get_dir_tree(dir):
     return children
 
 
-@blueprint.app_template_global('childrentree')
-def macro():
+def childrentree():
     pages = get_dir_tree(current_app.config['PAGES_DIR'])
 
     return Markup(render_template('_childrentree.html', pages=pages))
