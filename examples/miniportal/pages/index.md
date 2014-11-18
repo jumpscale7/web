@@ -1,14 +1,10 @@
 title: Portal, reloaded!
 template: index.html
 
-### Example pages
-
-
-
-{{ childrentree() }}
-
-
-First Header  | Second Header
-------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Cell
+{% include "header.html" %}
+{% include "about.html" %}
+{% include "services.html" %}
+{% include "callout.html" %}
+{% include "portfolio.html" %}
+{% include "call2action.html" %}
+{% include "map.html" %}
