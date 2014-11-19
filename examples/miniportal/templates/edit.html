@@ -6,7 +6,25 @@
 {% block head_css %}
     {{ super() }}
     <link rel="stylesheet" href="{{ url_for('static', filename='codemirror/codemirror.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='highlightjs/styles/default.css') }}">
     <style>
+    .CodeMirror {
+      border: 1px solid #eee;
+      height: auto;
+    }
+    .CodeMirror-scroll {
+      overflow-y: hidden;
+      overflow-x: auto;
+    }
+
+    /* Customization to markdown in CodeMirror */
+    .cm-header-1 { font-size: 150%; }
+    .cm-header-2 { font-size: 130%; }
+    .cm-header-3 { font-size: 120%; }
+    .cm-header-4 { font-size: 110%; }
+    .cm-header-5 { font-size: 100%; }
+    .cm-header-6 { font-size: 90%; }
+
     </style>
 
 {% endblock %}
@@ -14,12 +32,19 @@
 {% block tail_js %}
     {{ super() }}
     <script src="{{ url_for('static', filename='codemirror/codemirror.js') }}" type="text/javascript"></script>
-    <script src="{{ url_for('static', filename='codemirror/mode/javascript/javascript.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='codemirror/mode/markdown/markdown.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='codemirror/mode/gfm/gfm.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='codemirror/addon/mode/overlay.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='underscore/underscore.js') }}" type="text/javascript"></script>
     <script src="{{ url_for('static', filename='marked/marked.min.js') }}" type="text/javascript"></script>
+    <script src="{{ url_for('static', filename='highlightjs/highlight.pack.js') }}" type="text/javascript"></script>
     <script>
 
     $(function() {
+        var languageOverrides = {
+            js: 'javascript',
+            html: 'xml'
+        };
         marked.setOptions({
             renderer: new marked.Renderer(),
             gfm: true,
@@ -28,16 +53,44 @@
             pedantic: false,
             sanitize: true,
             smartLists: true,
-            smartypants: false
+            smartypants: false,
+            highlight: function(code, lang){
+                return hljs.highlight(lang, code).value;
+            }
         });
 
-        var editor = CodeMirror.fromTextArea($('.codemirror')[0], { lineNumbers: true });
+        var editor = CodeMirror.fromTextArea($('.codemirror')[0], { 
+            mode: 'gfm',
+            lineNumbers: true,
+            lineWrapping: true,
+            matchBrackets: true,
+            theme: 'default'
+        });
         var render = function() {
             var content = editor.getValue();
             $('#preview').html(marked(content));
         };
         render();
         editor.on('change', render);
+
+
+        // Sync scrolling. Thanks to [Dillinger](https://github.com/joemccann/dillinger/blob/cd8f877e2247bce2cb25d145596f15c15a0dbb30/public/js/user/user.controller.js)
+        var syncScroll = window.syncScroll = function(e) {
+            var
+                $other     = $divs.not(this).off('scroll'),
+                other      = $other[0],
+                percentage = this.scrollTop / (this.scrollHeight - this.offsetHeight);
+
+            other.scrollTop = Math.round(percentage * (other.scrollHeight - other.offsetHeight));
+
+            setTimeout(function() {
+                $other.on('scroll', syncScroll);
+            }, 10);
+
+            return false;
+        };
+        var $divs = $('#preview, .CodeMirror-scroll');
+        $divs.on('scroll', syncScroll);
     });
     </script>
 {% endblock %}
