@@ -12,17 +12,13 @@ License: [BSD](http://www.opensource.org/licenses/bsd-license.php)
 from __future__ import absolute_import
 from __future__ import unicode_literals
 from markdown import Extension
-from markdown.blockprocessors import BlockProcessor
+from markdown.extensions.tables import TableProcessor
 from markdown.util import etree
 
-class BootstrapTableProcessor(BlockProcessor):
+class BootstrapTableProcessor(TableProcessor):
 
-    def test(self, parent, block):
-        rows = block.split('\n')
-        return (len(rows) > 2 and '|' in rows[0] and 
-                '|' in rows[1] and '-' in rows[1] and 
-                rows[1].strip()[0] in ['|', ':', '-'])
-
+    # This method actually was copied from TableProcessor.run. The only change is adding
+    # `table.set('class', 'table')` to set Bootstrap table class
     def run(self, parent, blocks):
         """ Parse a table block and build table. """
         block = blocks.pop(0).split('\n')
@@ -52,34 +48,6 @@ class BootstrapTableProcessor(BlockProcessor):
         tbody = etree.SubElement(table, 'tbody')
         for row in rows:
             self._build_row(row.strip(), tbody, align, border)
-
-    def _build_row(self, row, parent, align, border):
-        """ Given a row of text, build table cells. """
-        tr = etree.SubElement(parent, 'tr')
-        tag = 'td'
-        if parent.tag == 'thead':
-            tag = 'th'
-        cells = self._split_row(row, border)
-        # We use align here rather than cells to ensure every row 
-        # contains the same number of columns.
-        for i, a in enumerate(align):
-            c = etree.SubElement(tr, tag)
-            try:
-                c.text = cells[i].strip()
-            except IndexError: #pragma: no cover
-                c.text = ""
-            if a:
-                c.set('align', a)
-
-    def _split_row(self, row, border):
-        """ split a row of text into list of cells. """
-        if border:
-            if row.startswith('|'):
-                row = row[1:]
-            if row.endswith('|'):
-                row = row[:-1]
-        return row.split('|')
-
 
 class BootstrapTableExtension(Extension):
     """ Add tables to Markdown. """

@@ -5,6 +5,7 @@ from werkzeug.utils import cached_property
 from flask import Flask, current_app, request, abort, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
 from .markdown_extensions import BootstrapTableExtension
 
+
 class Page:
     def __init__(self, path, content=None):
         self.path = path

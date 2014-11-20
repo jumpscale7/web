@@ -1,7 +1,19 @@
-{% extends "admin/base.html" %}
-{% import 'admin/static.html' as admin_static with context %}
+{% extends 'admin/master.html' %}
+{% import 'admin/lib.html' as lib with context %}
 
 {% block container_classes %}container-fluid{% endblock %}
+
+{% block body %}
+    <h3>{{ _gettext('You are editing %(path)s', path=path) }}</h3>
+    {% if error %}
+    <span>This file cannot be edited for now.</span>
+    {% else %}
+    Hi :) :)
+    {{ lib.render_form(form, dir_url) }}
+    {% endif %}
+
+{% endblock %}
+
 
 {% block head_css %}
     {{ super() }}
@@ -11,6 +23,8 @@
     .CodeMirror {
       border: 1px solid #eee;
       height: auto;
+      width: 50%;
+      float: left;
     }
     .CodeMirror-scroll {
       overflow-y: hidden;
@@ -28,6 +42,7 @@
     </style>
 
 {% endblock %}
+
 
 {% block tail_js %}
     {{ super() }}
@@ -59,7 +74,7 @@
             }
         });
 
-        var editor = CodeMirror.fromTextArea($('.codemirror')[0], { 
+        var editor = CodeMirror.fromTextArea($('.flask-markdown-input')[0], { 
             mode: 'gfm',
             lineNumbers: true,
             lineWrapping: true,
@@ -68,7 +83,7 @@
         });
         var render = function() {
             var content = editor.getValue();
-            $('#preview').html(marked(content));
+            $('.preview').html(marked(content));
         };
         render();
         editor.on('change', render);
@@ -89,21 +104,8 @@
 
             return false;
         };
-        var $divs = $('#preview, .CodeMirror-scroll');
+        var $divs = $('.preview, .CodeMirror-scroll');
         $divs.on('scroll', syncScroll);
     });
     </script>
 {% endblock %}
-
-
-{% block body %}
-<div class="row">
-    <div class="col-md-6">
-        <textarea id="codemirror" class="codemirror">{{ page.raw_content }}</textarea>
-    </div>
-    <div class="col-md-6">
-        <div id="preview"></div>
-    </div>
-</div>
-{% endblock body %}
-
