@@ -21,4 +21,33 @@ admin = Admin(app, 'Portal Admin', template_mode='bootstrap3')
 
 admin.add_view(PortalFileAdmin(app.root_path, '/', name='Files'))
 
+from wtforms import form, fields
+from flask.ext.admin.model.fields import InlineFormField
+from flask.ext.admin.form.fields import DateTimeField
+from flask.ext.admin.contrib.pymongo import ModelView
+
+class LocationForm(form.Form):
+    address = fields.TextField()
+    city = fields.TextField()
+
+class PeopleForm(form.Form):
+    name = fields.TextField()
+    email = fields.TextField()
+    born = DateTimeField()
+    location = InlineFormField(LocationForm)
+
+class PeopleView(ModelView):
+    column_list = ('name', 'email', 'born')
+    column_sortable_list = ('name', 'email', 'born')
+    column_searchable_list = ('name', 'email')
+
+    form = PeopleForm
+
+import pymongo
+conn = pymongo.Connection()
+db = conn.apitest
+
+admin.add_view(PeopleView(db.people, 'People'))
+
+
 app.run()
