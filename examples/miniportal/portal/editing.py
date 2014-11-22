@@ -26,7 +26,7 @@ class EditForm(form.BaseForm):
 
 
 class PortalFileAdmin(fileadmin.FileAdmin):
-    editable_extensions = ['md']
+    editable_extensions = ['md','py']
 
     @expose('/edit/', methods=('GET', 'POST'))
     def edit(self):

@@ -18,6 +18,7 @@ app.register_blueprint(blueprint)
 
 
 admin = Admin(app, 'Portal Admin', template_mode='bootstrap3')
+
 admin.add_view(PortalFileAdmin(app.root_path, '/', name='Files'))
 
 app.run()
