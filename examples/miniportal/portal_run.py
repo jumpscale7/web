@@ -16,7 +16,6 @@ toolbar = DebugToolbarExtension(app)
 app.config['PAGES_DIR'] = os.path.join(app.root_path, 'pages')
 app.register_blueprint(blueprint)
 
-
 admin = Admin(app, 'Portal Admin', template_mode='bootstrap3')
 
 admin.add_view(PortalFileAdmin(app.root_path, '/', name='Files'))
@@ -32,6 +31,7 @@ class LocationForm(form.Form):
 
 class PeopleForm(form.Form):
     name = fields.TextField()
+    color=fields.SelectField("test",choices=[["blue","blue"],["red","red"],["greem","green"]])
     email = fields.TextField()
     born = DateTimeField()
     location = InlineFormField(LocationForm)
@@ -40,7 +40,6 @@ class PeopleView(ModelView):
     column_list = ('name', 'email', 'born')
     column_sortable_list = ('name', 'email', 'born')
     column_searchable_list = ('name', 'email')
-
     form = PeopleForm
 
 import pymongo
