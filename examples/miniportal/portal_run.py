@@ -2,6 +2,8 @@ import os
 from flask import request, current_app, render_template, abort
 from flask_debugtoolbar import DebugToolbarExtension
 from flask.ext.admin import Admin
+from flask import jsonify
+from flask_swagger import swagger
 
 from portal import blueprint, Page, Portal
 from portal.editing import PortalFileAdmin
@@ -43,10 +45,16 @@ class PeopleView(ModelView):
     form = PeopleForm
 
 import pymongo
-conn = pymongo.Connection()
+conn = pymongo.MongoClient ()
 db = conn.apitest
 
 admin.add_view(PeopleView(db.people, 'People'))
 
 
-app.run()
+from portal.actors import all_actors
+from types import  ModuleType
+methods = [method for method in dir(all_actors) if isinstance(getattr(all_actors, method), ModuleType)]
+for method in methods:
+    app.add_url_rule('/'+method, method, getattr(getattr(all_actors, method), method))
+# app.view_functions['addUser'] = actors.addUser.addUser
+app.run(host='0.0.0.0')
