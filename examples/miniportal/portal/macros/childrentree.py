@@ -12,7 +12,7 @@ def get_dir_tree(dir):
     return children
 
 
-def childrentree():
+def childrentree(actors):
     pages = get_dir_tree(current_app.config['PAGES_DIR'])
 
     return Markup(render_template('partials/_childrentree.html', pages=pages))

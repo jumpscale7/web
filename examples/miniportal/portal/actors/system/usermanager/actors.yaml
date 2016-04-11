@@ -1,0 +1,23 @@
+addUser:
+ parameters:
+  - name: name
+    type: srting
+  - name: age
+    type: int
+editUser:
+ parameters:
+  - name: name
+    type: string
+getUser:
+ parameters:
+  - name: name
+    type: string
+listUsers:
+ parameters:
+  - name: name
+    type: string
+    default: azmy
+  - name: age
+    type: int
+    default: 20
+ result: x
