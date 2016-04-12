@@ -5,7 +5,6 @@ from werkzeug.utils import cached_property
 from flask import Flask, current_app, request, abort, url_for, render_template, render_template_string, Markup, Blueprint, send_from_directory
 from .markdown_extensions import BootstrapTableExtension
 
-
 class Page:
     def __init__(self, path, content=None):
         self.path = path
@@ -33,13 +32,13 @@ class Page:
 
     @cached_property
     def url(self):
-        path =  os.path.relpath(self.path, current_app.config['PAGES_DIR'])
+        path = os.path.relpath(self.path, current_app.config['PAGES_DIR'])
         path = os.path.splitext(path)[0]
         return url_for('portal.render_page', path=path)
 
     @cached_property
     def title(self):
-        path =  os.path.relpath(self.path, current_app.config['PAGES_DIR'])
+        path = os.path.relpath(self.path, current_app.config['PAGES_DIR'])
         alt_title = os.path.splitext(path)[0]
         return self.meta.get('title', [alt_title])[0]
 
@@ -51,12 +50,12 @@ class Portal(Flask):
 
 blueprint = Blueprint('portal', __name__)
 
-from portal import macros
 
 @blueprint.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(current_app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 
 @blueprint.route('/', defaults={'path': 'index'})
 @blueprint.route('/<path:path>')
